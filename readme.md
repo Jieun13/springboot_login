@@ -18,7 +18,7 @@ ____
 
 🚀 **API 명세**
 --
-## 1️⃣ 회원가입 API
+### 1️⃣ 회원가입 API
 
 + **POST** /api/jwt/signup
 
@@ -34,7 +34,7 @@ ____
 
 >"회원가입 성공"
 
-## 2️⃣ 로그인 API
+### 2️⃣ 로그인 API
 
 + **POST** /api/jwt/login
 
@@ -49,7 +49,7 @@ ____
 
 >"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
-## 3️⃣ 사용자 정보 조회 API
+### 3️⃣ 사용자 정보 조회 API
 
 + **GET** /api/jwt/info
 
@@ -63,7 +63,7 @@ ____
 "email": "test@example.com"
 }
 
-## 4️⃣ 관리자 페이지 API
+### 4️⃣ 관리자 페이지 API
 
 + **GET** /api/jwt/admin (관리자 권한이 있는 경우 접근 가능)
 
