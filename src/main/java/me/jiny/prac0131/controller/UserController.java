@@ -22,9 +22,10 @@ public class UserController {
         return "home";
     }
 
-    @PostMapping("/user")
+    @PostMapping("/signup")
     public String signup (UserRequest userRequest) {
         userService.save(userRequest);
+        System.out.println(userRequest);
         return "redirect:/login";
     }
 

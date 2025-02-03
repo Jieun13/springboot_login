@@ -42,17 +42,21 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                new AntPathRequestMatcher("/auth/login/kakao"),
                                 new AntPathRequestMatcher("/login"),
                                 new AntPathRequestMatcher("/signup"),
-                                new AntPathRequestMatcher("/api/jwt/**") // JWT 토큰 갱신 API
+                                new AntPathRequestMatcher("/api/jwt/**"), // JWT 토큰 갱신 API
+                                new AntPathRequestMatcher("/auth/**"),
+                                new AntPathRequestMatcher("/h2-console/**"),  // H2 콘솔 허용
+                                new AntPathRequestMatcher("/static/**")       // static 리소스 허용
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                .formLogin(formLogin -> formLogin
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/")
-                        .permitAll()
-                )
+//                .formLogin(formLogin -> formLogin
+//                        .loginPage("/login")
+//                        .defaultSuccessUrl("/")
+//                        .permitAll()
+//                )
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login")
                         .invalidateHttpSession(true)

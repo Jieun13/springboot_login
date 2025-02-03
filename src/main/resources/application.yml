@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb1s
+    url: jdbc:h2:mem:testdbss
 #      url: jdbc:h2:file:~/testdb1s
     driver-class-name: org.h2.Driver
     username: sa
@@ -19,3 +19,7 @@ spring:
 jwt:
   issuer: aa@gmail.com
   secret_key: sb-study
+
+kakao:
+  client-id: 7c1abe679fd03dfbdbf3ab027875f18b
+  redirect-url: http://localhost:8080/auth/login/kakao
