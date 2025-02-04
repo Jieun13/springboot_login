@@ -8,10 +8,19 @@
 <body>
 <div class="card">
     <div>home</div>
-    <a class="btn" th:href="@{/login}">로그인</a>
-    <a class="btn" th:href="@{/signup}">회원가입</a>
 
-    <a class="btn" th:href="@{/logout}">로그아웃</a>
+    <div class="card">
+        <div th:if="${user}!=null">
+            <a th:text="${user.username}"></a>
+            <a th:text="${user.email}"></a>
+
+            <a class="btn" th:href="@{/logout}">로그아웃</a>
+        </div>
+    </div>
+    <div>
+        <a class="btn" th:href="@{/login}">로그인</a>
+        <a class="btn" th:href="@{/signup}">회원가입</a>
+    </div>
 </div>
 
 </body>

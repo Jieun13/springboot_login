@@ -1,6 +1,8 @@
 package me.jiny.prac0131.service;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import me.jiny.prac0131.config.KakaoProperties;
 import me.jiny.prac0131.config.jwt.TokenProvider;
 import me.jiny.prac0131.domain.User;
 import me.jiny.prac0131.dto.KakaoTokenResponse;
@@ -11,6 +13,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
@@ -19,17 +22,19 @@ import java.time.Duration;
 public class KakaoAuthService {
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
+    private final KakaoProperties kakaoProperties;
 
     private final WebClient webClient = WebClient.builder().build();
 
     private final String KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token";
     private final String KAKAO_USER_URL = "https://kapi.kakao.com/v2/user/me";
 
-    @Value("${kakao.client-id}")
-    private String kakaoClientId;
-
-    @Value("${kakao.redirect-url}")
-    private String kakaoRedirectUrl;
+//    @Getter
+//    @Value("${kakao.client-id}")
+//    private String kakaoClientId;
+//
+//    @Value("${kakao.redirect-url}")
+//    private String kakaoRedirectUrl;
 
 
     public String kakaoLogin(String code){
@@ -48,17 +53,22 @@ public class KakaoAuthService {
 
     private KakaoTokenResponse getKakaoAccessToken(String code) {
         return webClient.post()
-                .uri(KAKAO_TOKEN_URL)  // URL 설정
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)  // 헤더 설정
+                .uri(KAKAO_TOKEN_URL)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData("grant_type", "authorization_code")
-                        .with("client_id", kakaoClientId)
-                        .with("redirect_uri", kakaoRedirectUrl)
-                        .with("code", code))  // 요청 바디 설정
-                .retrieve()  // 응답 받기
-                .bodyToMono(KakaoTokenResponse.class)  // 응답 타입 지정
-                .block();  // 동기 방식 처리
+                        .with("client_id", kakaoProperties.getClientId())
+                        .with("redirect_uri", kakaoProperties.getRedirectUri())
+                        .with("code", code))
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, response ->
+                        response.bodyToMono(String.class).flatMap(errorBody -> {
+                            System.err.println("Error Response: " + errorBody);
+                            return Mono.error(new RuntimeException("Kakao API 호출 오류: " + errorBody));
+                        })
+                )
+                .bodyToMono(KakaoTokenResponse.class)
+                .block();
     }
-
 
     private KakaoUserResponse getKakaoUser(String accessToken) {
         return webClient.get()
