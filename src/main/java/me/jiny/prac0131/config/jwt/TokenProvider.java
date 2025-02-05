@@ -21,22 +21,20 @@ import java.util.Set;
 @Service
 public class TokenProvider {
     private final JwtProperties jwtProperties;
-    private final long EXPIRATION_TIME = 1000 * 60 * 60; // 1시간
 
     public String generateToken(User user, Duration expiredAt) {
-        Date now = new Date();
-        return makeToken(user.getId(), user.getEmail());
+        return makeToken(user.getId(), user.getEmail(), expiredAt);
     }
 
     //토큰 생성 메소드
-    private String makeToken(Long userId, String email) {
+    private String makeToken(Long userId, String email, Duration expiredAt) {
         Date now = new Date();
 
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
                 .setIssuer(jwtProperties.getIssuer())
                 .setIssuedAt(now)
-                .setExpiration(new Date(System.currentTimeMillis()+EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + expiredAt.toMillis()))
                 .setSubject(email)
                 .claim("id", userId)
                 .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey())

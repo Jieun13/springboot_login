@@ -1,16 +1,21 @@
 package me.jiny.prac0131.service;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import me.jiny.prac0131.config.jwt.TokenProvider;
 import me.jiny.prac0131.domain.User;
 import me.jiny.prac0131.dto.KakaoTokenResponse;
 import me.jiny.prac0131.dto.KakaoUserResponse;
+import me.jiny.prac0131.oAuth.CookieUtil;
 import me.jiny.prac0131.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
@@ -24,13 +29,27 @@ public class KakaoAuthService {
 
     private final String KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token";
     private final String KAKAO_USER_URL = "https://kapi.kakao.com/v2/user/me";
+    private final String KAKAO_LOGOUT_URL = "https://kauth.kakao.com/oauth/logout";
+
+    @Value("${kakao.auth-url}")
+    private String kakaoAuthUrl;
 
     @Value("${kakao.client-id}")
     private String kakaoClientId;
 
-    @Value("${kakao.redirect-url}")
-    private String kakaoRedirectUrl;
+    @Value("${kakao.redirect-uri}")
+    private String kakaoRedirectUrI;
 
+    @Value("${kakao.logout-uri}")
+    private String kakaoLogoutUri;
+
+    public String getKakaoLoginUrl() {
+        return kakaoAuthUrl + "?client_id=" + kakaoClientId + "&redirect_uri=" + kakaoRedirectUrI + "&response_type=code";
+    }
+
+    public String getKakaoLogoutUrl() {
+        return KAKAO_LOGOUT_URL + "?client_id=" + kakaoClientId + "&&logout_redirect_uri=" + kakaoLogoutUri;
+    }
 
     public String kakaoLogin(String code){
         KakaoTokenResponse tokenResponse = getKakaoAccessToken(code);
@@ -48,15 +67,21 @@ public class KakaoAuthService {
 
     private KakaoTokenResponse getKakaoAccessToken(String code) {
         return webClient.post()
-                .uri(KAKAO_TOKEN_URL)  // URL 설정
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)  // 헤더 설정
+                .uri(KAKAO_TOKEN_URL)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData("grant_type", "authorization_code")
                         .with("client_id", kakaoClientId)
-                        .with("redirect_uri", kakaoRedirectUrl)
-                        .with("code", code))  // 요청 바디 설정
-                .retrieve()  // 응답 받기
-                .bodyToMono(KakaoTokenResponse.class)  // 응답 타입 지정
-                .block();  // 동기 방식 처리
+                        .with("redirect_uri", kakaoRedirectUrI)
+                        .with("code", code))
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, response ->
+                        response.bodyToMono(String.class).flatMap(errorBody -> {
+                            System.err.println("Error Response: " + errorBody);
+                            return Mono.error(new RuntimeException("Kakao API 호출 오류: " + errorBody));
+                        })
+                )
+                .bodyToMono(KakaoTokenResponse.class)
+                .block();
     }
 
 
@@ -73,7 +98,6 @@ public class KakaoAuthService {
         User newUser = User.builder()
                 .email(kakaoUser.getEmail())
                 .username(kakaoUser.getNickname())
-                .password("kakaoPw" + kakaoUser.getEmail()) //임의로 패스워드 설정
                 .build();
         return userRepository.save(newUser);
     }

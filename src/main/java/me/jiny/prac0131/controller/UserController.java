@@ -1,47 +1,46 @@
 package me.jiny.prac0131.controller;
 
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import me.jiny.prac0131.dto.UserRequest;
 import me.jiny.prac0131.service.UserService;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @RequiredArgsConstructor
 @Controller
 public class UserController {
     private final UserService userService;
 
-    @GetMapping("/")
-    public String home(){
-        return "home";
+    @GetMapping("/signup")
+    public String signup(){
+        return "signup";
     }
 
     @PostMapping("/signup")
-    public String signup (UserRequest userRequest) {
-        userService.save(userRequest);
-        System.out.println(userRequest);
+    public String signup(UserRequest request, RedirectAttributes redirectAttributes) {
+        if (userService.checkUsernameDuplicate(request.getUsername())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "이미 사용 중인 사용자 이름입니다.");
+            return "redirect:/signup";
+        }
+        if (userService.checkEmailDuplicate(request.getEmail())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "이미 사용 중인 이메일입니다.");
+            return "redirect:/signup";
+        }
+        userService.save(request);
         return "redirect:/login";
     }
 
-    @GetMapping("/logout")
-    public String logout(HttpServletRequest request, HttpServletResponse response) {
-        new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
-        return "redirect:/";
-    }
+//    @GetMapping("/logout")
+//    public String logout(HttpServletRequest request, HttpServletResponse response) {
+//        CookieUtil.deleteCookie(request, response, "jwt_token");
+//        request.getSession().invalidate();
+//        return "redirect:/";
+//    }
 
     @GetMapping("/login")
     public String login(){
         return "login";
-    }
-
-    @GetMapping("/signup")
-    public String signup(){
-        return "signup";
     }
 }

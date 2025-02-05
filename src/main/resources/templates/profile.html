@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+  <div class="card">
+    <div class="card-header text-center">
+      <h2>내 프로필</h2>
+    </div>
+    <div class="card-body text-center">
+      <a class="btn btn-primary mb-3" href="/">홈으로</a>
+    </div>
+    <div class="card-body">
+      <section class="profile">
+        <h4 class="mb-3">사용자 정보</h4>
+        <table class="table table-bordered text-center">
+          <tbody>
+          <tr>
+            <th class="bg-light w-25">아이디</th>
+            <td th:text="${user.id}">아이디</td>
+          </tr>
+          <tr>
+            <th class="bg-light">이름</th>
+            <td th:text="${user.username}">이름</td>
+          </tr>
+          <tr>
+            <th class="bg-light">이메일</th>
+            <td th:text="${user.email}">이메일</td>
+          </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+</div>
+</body>
+</html>

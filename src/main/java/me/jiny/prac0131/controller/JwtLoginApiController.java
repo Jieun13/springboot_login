@@ -6,7 +6,6 @@ import me.jiny.prac0131.dto.UserRequest;
 import me.jiny.prac0131.service.UserService;
 import me.jiny.prac0131.domain.User;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;

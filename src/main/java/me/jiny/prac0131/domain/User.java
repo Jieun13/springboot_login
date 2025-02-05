@@ -23,10 +23,9 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotEmpty
     private String username;
 
-    @NotEmpty
+    @Column(nullable = true) //비밀번호 null 허용
     private String password;
 
     @Email
