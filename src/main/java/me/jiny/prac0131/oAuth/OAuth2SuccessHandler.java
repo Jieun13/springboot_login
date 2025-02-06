@@ -1,5 +1,6 @@
 package me.jiny.prac0131.oAuth;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -42,11 +43,25 @@ public class OAuth2SuccessHandler  extends SimpleUrlAuthenticationSuccessHandler
 
         //액세스 토큰 생성해서 패스에 추가
         String accessToken = tokenProvider.generateToken(user, ACCESS_TOKEN_DURATION);
-        String targetUrl = getTargetUrl(accessToken);
+
+        Cookie refreshcookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken);
+        refreshcookie.setPath("/");
+        refreshcookie.setHttpOnly(false);
+        refreshcookie.setSecure(true);
+        refreshcookie.setMaxAge((int) REFRESH_TOKEN_DURATION.toSeconds());
+
+        Cookie accessCookie = new Cookie("access_token", accessToken);
+        accessCookie.setPath("/");
+        accessCookie.setHttpOnly(false);
+        accessCookie.setSecure(true);
+        accessCookie.setMaxAge((int) ACCESS_TOKEN_DURATION.toSeconds());
+
+        response.addCookie(refreshcookie);
+        response.addCookie(accessCookie);
 
         //설정값, 쿠키 제거, 리다이렉트
         clearAuthenticationAttributes(request, response);
-        getRedirectStrategy().sendRedirect(request, response, targetUrl);
+        getRedirectStrategy().sendRedirect(request, response, REDIRECT_PATH);
     }
 
     //생성된 리프레시 토큰을 데이터베이스에 저장
@@ -67,7 +82,9 @@ public class OAuth2SuccessHandler  extends SimpleUrlAuthenticationSuccessHandler
     //설정값, 쿠키 제거
     private void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {
         super.clearAuthenticationAttributes(request);
-        authorizationReequestRepository.removeAuthorizationRequestCookies(request, response);
+        if (authorizationReequestRepository != null) {
+            authorizationReequestRepository.removeAuthorizationRequestCookies(request, response);
+        }
     }
 
     private String getTargetUrl(String token) {

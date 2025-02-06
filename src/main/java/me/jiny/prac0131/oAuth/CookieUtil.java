@@ -12,7 +12,7 @@ public class CookieUtil {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
         cookie.setSecure(false); //개발모드에서만 false, 배포 시에는 true
-        cookie.setHttpOnly(true); //XSS 공격 방지
+        cookie.setHttpOnly(true);
         cookie.setMaxAge(maxAge);
         response.addCookie(cookie);
     }

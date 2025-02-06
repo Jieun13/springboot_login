@@ -18,12 +18,20 @@
 <!--                <a class="btn btn-secondary mx-2" href="/login">로그인</a>-->
 <!--                <button type="button" class="btn btn-secondary mx-2" id="logout-btn">로그아웃</button>-->
 <!--            </div>-->
+            <!-- 구글 로그인 버튼 -->
+            <div class="d-flex justify-content-center mb-3">
+<!--                <a href="/auth/login/google">-->
+                <a th:href="${googleLoginUrl}">
+                    <img src="/img/googleLogin.png" alt="구글 로그인" width="183">
+                </a>
+                <a class="btn btn-secondary mx-2" th:href="${googleLogoutUrl}">구글 로그아웃</a>
+            </div>
             <!-- 카카오 로그인, 로그아웃 버튼 -->
             <div class="d-flex justify-content-center mb-3">
-                <a th:href="${loginUrl}">
+                <a th:href="${kakaoLoginUrl}">
                     <img src="/img/kakaoLogin.png" alt="카카오 로그인" width="183">
                 </a>
-                <a class="btn btn-secondary mx-2" th:href="${logoutUrl}">카카오 로그아웃</a>
+                <a class="btn btn-secondary mx-2" th:href="${kakaoLogoutUrl}">카카오 로그아웃</a>
             </div>
             <!-- 회원 정보 & 환영 메시지 -->
             <div class="d-flex justify-content-center align-items-center">

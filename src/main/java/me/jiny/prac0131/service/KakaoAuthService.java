@@ -31,13 +31,13 @@ public class KakaoAuthService {
     private final String KAKAO_USER_URL = "https://kapi.kakao.com/v2/user/me";
     private final String KAKAO_LOGOUT_URL = "https://kauth.kakao.com/oauth/logout";
 
-    @Value("${kakao.auth-url}")
+    @Value("${spring.security.oauth2.client.provider.kakao.authorization-uri}")
     private String kakaoAuthUrl;
 
-    @Value("${kakao.client-id}")
+    @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
     private String kakaoClientId;
 
-    @Value("${kakao.redirect-uri}")
+    @Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
     private String kakaoRedirectUrI;
 
     @Value("${kakao.logout-uri}")
@@ -83,7 +83,6 @@ public class KakaoAuthService {
                 .bodyToMono(KakaoTokenResponse.class)
                 .block();
     }
-
 
     private KakaoUserResponse getKakaoUser(String accessToken) {
         return webClient.get()
