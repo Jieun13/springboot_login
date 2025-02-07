@@ -43,13 +43,21 @@ public class TokenApiController {
 
         // "Bearer {token}"에서 실제 토큰만 추출
         String token = authorizationHeader.substring(7);
-        Long userId = tokenProvider.getUserId(token);
+        System.out.println("Received token: " + token); // 토큰 값 출력
 
-        User user = userService.findById(userId);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        if (token.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        return ResponseEntity.ok(user);
+        try {
+            Long userId = tokenProvider.getUserId(token);
+            User user = userService.findById(userId);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.ok(user);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();  // 잘못된 토큰 처리
+        }
     }
 }

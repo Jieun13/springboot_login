@@ -56,11 +56,15 @@ public class TokenProvider {
     //토큰 기반으로 인증 정보를 가져오는 메소드
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
+        if (claims == null) {
+            throw new IllegalArgumentException("JWT 토큰에 유효한 정보가 없습니다.");
+        }
         Set<GrantedAuthority> authorities = Collections.singleton(
                 new SimpleGrantedAuthority("ROLE_USER"));
         return new UsernamePasswordAuthenticationToken(new org.springframework.security.core.userdetails.User(
                 claims.getSubject(), "", authorities), token, authorities);
     }
+
 
     //토큰 기반으로 유저 ID를 가져오는 메소드
     public Long getUserId(String token) {
@@ -69,9 +73,16 @@ public class TokenProvider {
     }
 
     private Claims getClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(jwtProperties.getSecretKey())
-                .parseClaimsJws(token)
-                .getBody();
+
+        if(token == null) return null;
+
+        try {
+            return Jwts.parser()
+                    .setSigningKey(jwtProperties.getSecretKey())
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("잘못된 JWT 토큰입니다: " + token, e);
+        }
     }
 }
