@@ -21,15 +21,15 @@
           <tbody>
           <tr>
             <th class="bg-light w-25">아이디</th>
-            <td th:text="${user.id}">아이디</td>
+            <td id="user-id">아이디</td> <!-- id 추가 -->
           </tr>
           <tr>
             <th class="bg-light">이름</th>
-            <td th:text="${user.username}">이름</td>
+            <td id="user-name">이름</td> <!-- id 추가 -->
           </tr>
           <tr>
             <th class="bg-light">이메일</th>
-            <td th:text="${user.email}">이메일</td>
+            <td id="user-email">이메일</td> <!-- id 추가 -->
           </tr>
           </tbody>
         </table>
@@ -38,4 +38,42 @@
   </div>
 </div>
 </body>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const token = localStorage.getItem("access_token");  // 로컬 스토리지에서 토큰 가져오기
+
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      window.location.href = "/";
+      return;
+    }
+
+    fetch("/api/profile", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error("유저 정보를 불러올 수 없습니다.");
+              }
+              return response.json();
+            })
+            .then(user => {
+              // 로컬 스토리지에서 가져온 사용자 정보로 각 요소를 업데이트
+              document.getElementById("user-id").textContent = user.id;
+              document.getElementById("user-name").textContent = user.username;
+              document.getElementById("user-email").textContent = user.email;
+            })
+            .catch(error => {
+              console.error("Error:", error);
+              alert("로그인이 만료되었습니다. 다시 로그인해주세요.");
+              localStorage.removeItem("access_token");  // 로컬 스토리지에서 토큰 삭제
+              window.location.href = "/";
+            });
+  });
+</script>
+
 </html>

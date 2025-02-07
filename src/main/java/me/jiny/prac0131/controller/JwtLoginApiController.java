@@ -12,7 +12,7 @@ import java.time.Duration;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/jwt")
+@RequestMapping("/api/jwt")
 public class JwtLoginApiController {
 
     private final UserService userService;

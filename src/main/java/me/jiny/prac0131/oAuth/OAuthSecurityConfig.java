@@ -49,7 +49,7 @@ public class OAuthSecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/**")).permitAll())
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/auth/login/kakao")
+                        .loginPage("/login")
                         .authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository()))
                         .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint.userService(oAuth2UserService))
                         .successHandler(oAuth2SuccessHandler())

@@ -12,26 +12,65 @@
             <h3>Home</h3>
         </div>
         <div class="card-body text-center">
-<!--            &lt;!&ndash; 로그인과 회원가입 버튼 &ndash;&gt;-->
-<!--            <div class="d-flex justify-content-center mb-3">-->
-<!--                <a class="btn btn-secondary mx-2" href="/signup">회원가입</a>-->
-<!--                <a class="btn btn-secondary mx-2" href="/login">로그인</a>-->
-<!--                <button type="button" class="btn btn-secondary mx-2" id="logout-btn">로그아웃</button>-->
-<!--            </div>-->
-            <!-- 카카오 로그인, 로그아웃 버튼 -->
+            <!--구글 oauth 로그인 버튼-->
             <div class="d-flex justify-content-center mb-3">
-                <a th:href="${loginUrl}">
-                    <img src="/img/kakaoLogin.png" alt="카카오 로그인" width="183">
+                <a href="/oauth2/authorization/google">
+                    <img src="/img/googleLogin.png" alt="카카오 로그인" width="183">
                 </a>
-                <a class="btn btn-secondary mx-2" th:href="${logoutUrl}">카카오 로그아웃</a>
             </div>
-            <!-- 회원 정보 & 환영 메시지 -->
-            <div class="d-flex justify-content-center align-items-center">
-                <a class="btn btn-primary mx-2" href="/auth/profile">회원 정보</a>
-                <span th:text="|${user.username}님 환영합니다.|" class="font-weight-bold"></span>
-            </div>
+            <a class="btn btn-primary" href="/profile">프로필</a>
+        </div>
+        <div class="card-body text=center d-flex justify-content-center">
+            <a id="user-name">로그인을 해주세요</a>
+        </div>
         </div>
     </div>
-</div>
 </body>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const token = searchParam('token');
+
+        if (token) {
+            console.log("✅ 액세스 토큰 저장:", token);
+            localStorage.setItem("access_token", token);
+
+            // 토큰이 URL에 남아 있지 않도록 현재 URL 정리
+            const newUrl = removeParam("token");
+            history.replaceState({}, document.title, newUrl);
+        }
+
+        function searchParam(key) {
+            return new URLSearchParams(location.search).get(key);
+        }
+
+        function removeParam(param) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete(param);
+            return url.toString();
+        }
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const token = localStorage.getItem("access_token");  // 로컬 스토리지에서 토큰 가져오기
+
+        fetch("/api/profile", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("유저 정보를 불러올 수 없습니다.");
+                }
+                return response.json();
+            })
+            .then(user => {
+                // 로컬 스토리지에서 가져온 사용자 정보로 각 요소를 업데이트
+                document.getElementById("user-name").textContent = user.username;
+            });
+    });
+</script>
 </html>
