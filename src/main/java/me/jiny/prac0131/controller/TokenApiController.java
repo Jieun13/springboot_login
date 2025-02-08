@@ -43,7 +43,6 @@ public class TokenApiController {
 
         // "Bearer {token}"에서 실제 토큰만 추출
         String token = authorizationHeader.substring(7);
-        System.out.println("Received token: " + token); // 토큰 값 출력
 
         if (token.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

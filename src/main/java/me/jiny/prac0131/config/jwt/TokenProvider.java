@@ -73,7 +73,6 @@ public class TokenProvider {
     }
 
     private Claims getClaims(String token) {
-
         if(token == null) return null;
 
         try {

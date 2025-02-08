@@ -3,13 +3,15 @@ package me.jiny.prac0131.oAuth;
 import lombok.RequiredArgsConstructor;
 import me.jiny.prac0131.domain.User;
 import me.jiny.prac0131.repository.UserRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import java.util.Collections;
 
 @RequiredArgsConstructor
 @Service
@@ -19,20 +21,23 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        saveOrUpdate(oAuth2User);
-        return oAuth2User;
+        String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        String userNameAttributeName = userRequest.getClientRegistration()
+                .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
+
+        OAuth2Attributes attributes = OAuth2Attributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
+        User user = saveOrUpdate(attributes);
+
+        return new DefaultOAuth2User(
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
+                attributes.getAttributes(),
+                attributes.getNameAttributeKey());
     }
 
-    private User saveOrUpdate(OAuth2User oAuth2User) {
-        Map<String, Object> attributes = oAuth2User.getAttributes();
-        String email = (String) attributes.get("email");
-        String name = (String) attributes.get("name");
-        User user = userRepository.findByEmail(email)
-                .map(entity->entity.update(name))
-                .orElse(User.builder()
-                        .email(email)
-                        .username(name)
-                        .build());
+    private User saveOrUpdate(OAuth2Attributes attributes) {
+        User user = userRepository.findByEmail(attributes.getEmail())
+                .map(entity -> entity.update(attributes.getName()))
+                .orElse(attributes.toEntity());
         return userRepository.save(user);
     }
 }

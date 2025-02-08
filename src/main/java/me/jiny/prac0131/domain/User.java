@@ -29,6 +29,7 @@ public class User implements UserDetails {
     private String password;
 
     @Email
+    @Column(unique = true)
     private String email;
 
     @Builder
